@@ -55,6 +55,7 @@ project-folder/
 ├── app.py
 ├── requirements.txt
 ├── Dockerfile
+├──test_basic.py
 ├── .dockerignore
 └── README.md
 
