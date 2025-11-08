@@ -111,6 +111,11 @@ Open browser:
 http://127.0.0.1:5000/products
 
 ---
+### Test Simple Test Script
+pip install requests
+
+python test_basic.py
+
 
 ## 7. Deployment to Render
 
