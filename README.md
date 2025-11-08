@@ -79,6 +79,11 @@ python app.py
 http://127.0.0.1:5000/health
 
 ---
+### step 6: Test Simple Test Script
+
+pip install requests
+
+python test_basic.py
 
 ## 5. API Endpoints
 
@@ -111,10 +116,6 @@ Open browser:
 http://127.0.0.1:5000/products
 
 ---
-### Test Simple Test Script
-pip install requests
-
-python test_basic.py
 
 
 ## 7. Deployment to Render
