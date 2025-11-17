@@ -1,59 +1,115 @@
 from flask import Flask, jsonify, request
-import uuid
-from datetime import datetime
 
 app = Flask(__name__)
 
-# In-memory products (simple sample data)
-products = [
-    {"id": "1", "name": "Laptop", "category": "Electronics", "price": 999.99, "in_stock": True},
-    {"id": "2", "name": "Book",   "category": "Education",   "price": 29.99,  "in_stock": True},
-]
+# Sample product data - RESET to original state
+products = {
+    1: {"id": 1, "name": "Laptop", "price": 999.99, "category": "Electronics"},
+    2: {"id": 2, "name": "Book", "price": 29.99, "category": "Education"}
+}
 
-@app.route("/")
+# Home endpoint 
+@app.route("/", methods=["GET"])
 def home():
+    return jsonify({
+        "message": "Welcome to Product Catalog API",
+        "status": "running",
+        "endpoints": {
+            "home": "/",
+            "health": "/health", 
+            "all_products": "/products",
+            "get_product": "/products/1"
+        }
+    })
+
+# Health endpoint
+@app.route("/health", methods=["GET"])
+def health():
     return jsonify({
         "service": "Product Catalog",
         "version": "1.0.0",
         "endpoints": {
+            "health": "/health",
             "products": "/products",
-            "product_by_id": "/products/<product_id>",
-            "health": "/health"
+            "product_by_id": "/products/<product_id>"
         }
     })
 
-@app.route("/health")
-def health():
-    return jsonify({"status": "healthy", "service": "product-catalog", "timestamp": str(datetime.utcnow())})
-
+# GET all products
 @app.route("/products", methods=["GET"])
 def get_products():
-    return jsonify({"products": products, "count": len(products)})
+    return jsonify({
+        "count": len(products),
+        "products": products
+    })
 
-@app.route("/products/<product_id>", methods=["GET"])
+# GET one product by ID
+@app.route("/products/<int:product_id>", methods=["GET"])
 def get_product(product_id):
-    for p in products:
-        if p["id"] == product_id:
-            return jsonify(p)
+    if product_id in products:
+        return jsonify(products[product_id])
     return jsonify({"error": "Product not found"}), 404
 
-# optional: create a product (simple)
+# POST – Add new product - FIXED: Returns ACTUAL product, not message
 @app.route("/products", methods=["POST"])
-def create_product():
-    data = request.get_json() or {}
-    if "name" not in data or "price" not in data:
-        return jsonify({"error": "Missing name or price"}), 400
-    new_id = str(uuid.uuid4())[:8]
-    p = {
+def add_product():
+    data = request.get_json()
+    
+    # Validation
+    if not data or not all(k in data for k in ['name', 'price', 'category']):
+        return jsonify({"error": "Missing required fields: name, price, category"}), 400
+    
+    try:
+        price = float(data['price'])
+    except ValueError:
+        return jsonify({"error": "Price must be a number"}), 400
+    
+    # Create new product
+    new_id = max(products.keys()) + 1
+    new_product = {
         "id": new_id,
-        "name": data["name"],
-        "category": data.get("category", "Misc"),
-        "price": float(data["price"]),
-        "in_stock": bool(data.get("in_stock", True)),
-        "created_at": str(datetime.utcnow())
+        "name": data['name'],
+        "price": price,
+        "category": data['category']
     }
-    products.append(p)
-    return jsonify({"message": "Product created", "product": p}), 201
+    products[new_id] = new_product
+    return jsonify(new_product), 201  # Returns the PRODUCT, not a message
 
+# PUT – Update product - FIXED: Returns ACTUAL product, not message
+@app.route("/products/<int:product_id>", methods=["PUT"])
+def update_product(product_id):
+    if product_id not in products:
+        return jsonify({"error": "Product not found"}), 404
+
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No data provided"}), 400
+    
+    # Update only provided fields
+    if 'name' in data:
+        products[product_id]['name'] = data['name']
+    if 'price' in data:
+        try:
+            products[product_id]['price'] = float(data['price'])
+        except ValueError:
+            return jsonify({"error": "Price must be a number"}), 400
+    if 'category' in data:
+        products[product_id]['category'] = data['category']
+    
+    return jsonify(products[product_id])  # Returns the PRODUCT, not a message
+
+# DELETE – Remove product
+@app.route("/products/<int:product_id>", methods=["DELETE"])
+def delete_product(product_id):
+    if product_id not in products:
+        return jsonify({"error": "Product not found"}), 404
+
+    deleted = products.pop(product_id)
+    return jsonify({
+        "message": "Product deleted successfully",
+        "deleted_product": deleted
+    })
+
+# Run app
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
