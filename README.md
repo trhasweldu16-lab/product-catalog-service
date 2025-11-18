@@ -44,6 +44,7 @@ This project demonstrates core concepts in REST API development, containerizatio
 |-------------|------------------------|
 | Python | 3.9 |
 | Flask | 2.3 |
+| Werkzeug 2.3.7
 | Requests | 2.31 (for testing) |
 | Git | Latest version |
 | Docker Desktop | Latest version |
