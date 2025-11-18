@@ -32,7 +32,7 @@ def test_create_product():
     expect(201, r)
     created = r.json()
     print("Created:", created)
-    return created["id"]  # This will now work because POST returns product with ID
+    return created["id"]  
 
 def test_update_product(product_id):
     print("\n=== Testing PUT - Update Product ===")
@@ -97,6 +97,6 @@ if __name__ == "__main__":
     test_list_products()
     
     print("\n" + "=" * 50)
-    print("🎉 ALL TESTS PASSED!")
+    print(" ALL TESTS PASSED!")
     print("✅ POST, GET, PUT, DELETE all working perfectly!")
     print("✅ No crashes - All response formats match!")

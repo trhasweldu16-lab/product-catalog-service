@@ -52,7 +52,7 @@ def get_product(product_id):
         return jsonify(products[product_id])
     return jsonify({"error": "Product not found"}), 404
 
-# POST – Add new product - FIXED: Returns ACTUAL product, not message
+# POST – Add new product 
 @app.route("/products", methods=["POST"])
 def add_product():
     data = request.get_json()
@@ -77,7 +77,7 @@ def add_product():
     products[new_id] = new_product
     return jsonify(new_product), 201  # Returns the PRODUCT, not a message
 
-# PUT – Update product - FIXED: Returns ACTUAL product, not message
+# PUT – Update product 
 @app.route("/products/<int:product_id>", methods=["PUT"])
 def update_product(product_id):
     if product_id not in products:
